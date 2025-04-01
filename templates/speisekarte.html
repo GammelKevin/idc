@@ -1,0 +1,594 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="menu-page">
+    <header class="menu-header">
+        <h1>Unsere Speisekarte</h1>
+        <div class="menu-notice">
+            <p>Warme Küche: 11:30–14:00 & 17:00–21:00 Uhr</p>
+            <p class="mittagsangebot-info"><i class="fas fa-utensils"></i> Bei jedem Mittagsangebot ist eine Suppe inklusive!</p>
+        </div>
+        
+        <!-- Suchleiste -->
+        <div class="search-container">
+            <input type="text" id="menu-search" placeholder="Gericht suchen...">
+            <button id="search-button"><i class="fas fa-search"></i></button>
+        </div>
+        <div id="no-results-message" style="display: none; text-align: center; margin-top: 15px; color: #888; font-style: italic;">
+            Keine Ergebnisse gefunden. Bitte versuchen Sie einen anderen Suchbegriff.
+        </div>
+    </header>
+
+    <div class="menu-content">
+        <!-- Speisenkategorien -->
+        <h2 class="section-title">Speisen</h2>
+        <div class="food-categories">
+            {% for category in categories %}
+                {% if not category.is_drink_category %}
+                    <section class="menu-section">
+                        <h2 class="category-title">{{ category.display_name }} <span class="toggle-icon">+</span></h2>
+                        <div class="menu-items hidden">
+                            {% set item_count = 0 %}
+                            {% for item in menu_items %}
+                                {% if item.category_id == category.id %}
+                                    {% set item_count = item_count + 1 %}
+                                    <div class="menu-item {% if item.image_path %}with-image{% endif %}" data-name="{{ item.name | lower }}" data-description="{{ item.description | lower }}">
+                                        {% if item.image_path %}
+                                            <div class="menu-item-image">
+                                                <img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.name }}" loading="lazy">
+                                            </div>
+                                        {% endif %}
+                                        <div class="menu-item-content">
+                                            <div class="item-header">
+                                                <h3 class="item-name">{{ item.name | safe }}</h3>
+                                                <span class="item-price">{{ "%.2f"|format(item.price) }}€</span>
+                                            </div>
+                                            <p class="description">{{ item.description | safe }}</p>
+                                            <div class="item-tags">
+                                                {% if item.vegetarian %}
+                                                    <span class="badge vegetarian" title="Vegetarisch">🥕 Vegetarisch</span>
+                                                {% endif %}
+                                                {% if item.vegan %}
+                                                    <span class="badge vegan" title="Vegan">🌱 Vegan</span>
+                                                {% endif %}
+                                                {% if item.spicy %}
+                                                    <span class="badge spicy" title="Scharf">🌶️ Scharf</span>
+                                                {% endif %}
+                                                {% if item.gluten_free %}
+                                                    <span class="badge gluten-free" title="Glutenfrei">🌾❌ Glutenfrei</span>
+                                                {% endif %}
+                                                {% if item.lactose_free %}
+                                                    <span class="badge lactose-free" title="Laktosefrei">🥛❌ Laktosefrei</span>
+                                                {% endif %}
+                                                {% if item.kid_friendly %}
+                                                    <span class="badge kid-friendly" title="Kinderfreundlich">👶 Kinderfreundlich</span>
+                                                {% endif %}
+                                                {% if item.alcohol_free %}
+                                                    <span class="badge alcohol-free" title="Alkoholfrei">🍺❌ Alkoholfrei</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            {% if item_count == 0 %}
+                                <p class="no-items" style="display: none;">Keine Artikel in dieser Kategorie gefunden.</p>
+                            {% endif %}
+                        </div>
+                    </section>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Getränkekategorien -->
+        <h2 class="section-title">Getränke</h2>
+        <div class="drink-categories">
+            {% for category in categories %}
+                {% if category.is_drink_category %}
+                    <section class="menu-section drink-category">
+                        <h2 class="category-title">{{ category.display_name }} <span class="toggle-icon">+</span></h2>
+                        <div class="menu-items hidden">
+                            {% set item_count = 0 %}
+                            {% for item in menu_items %}
+                                {% if item.category_id == category.id %}
+                                    {% set item_count = item_count + 1 %}
+                                    <div class="menu-item {% if item.image_path %}with-image{% endif %}" data-name="{{ item.name | lower }}" data-description="{{ item.description | lower }}">
+                                        {% if item.image_path %}
+                                            <div class="menu-item-image">
+                                                <img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.name }}" loading="lazy">
+                                            </div>
+                                        {% endif %}
+                                        <div class="menu-item-content">
+                                            <div class="item-header">
+                                                <h3 class="item-name">{{ item.name | safe }}</h3>
+                                                <span class="item-price">{{ "%.2f"|format(item.price) }}€</span>
+                                            </div>
+                                            <p class="description">{{ item.description | safe }}</p>
+                                            <div class="item-tags">
+                                                {% if item.vegetarian %}
+                                                    <span class="badge vegetarian" title="Vegetarisch">🥕 Vegetarisch</span>
+                                                {% endif %}
+                                                {% if item.vegan %}
+                                                    <span class="badge vegan" title="Vegan">🌱 Vegan</span>
+                                                {% endif %}
+                                                {% if item.alcohol_free %}
+                                                    <span class="badge alcohol-free" title="Alkoholfrei">🍺❌ Alkoholfrei</span>
+                                                {% endif %}
+                                                {% if item.contains_alcohol %}
+                                                    <span class="badge contains-alcohol" title="Enthält Alkohol">🍺 Enthält Alkohol</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            {% if item_count == 0 %}
+                                <p class="no-items" style="display: none;">Keine Artikel in dieser Kategorie gefunden.</p>
+                            {% endif %}
+                        </div>
+                    </section>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .menu-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px;
+    }
+
+    .menu-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .menu-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5em;
+        color: #c17817;
+        margin-bottom: 20px;
+    }
+
+    .mittagsangebot-info {
+        color: #c17817;
+        font-weight: bold;
+        background-color: rgba(193, 120, 23, 0.1);
+        padding: 10px 15px;
+        border-radius: 6px;
+        margin-top: 10px;
+        display: inline-block;
+    }
+
+    .mittagsangebot-info i {
+        margin-right: 8px;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        color: #333;
+        font-size: 2.2em;
+        text-align: center;
+        margin: 50px 0 25px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #c17817;
+    }
+
+    /* Suchleiste */
+    .search-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 500px;
+        margin: 0 auto 40px;
+    }
+
+    #menu-search {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px 0 0 8px;
+        font-size: 16px;
+        outline: none;
+    }
+
+    #search-button {
+        background: #c17817;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #search-button:hover {
+        background: #a36613;
+    }
+
+    .menu-section {
+        margin-bottom: 40px;
+    }
+
+    .category-title {
+        font-family: 'Playfair Display', serif;
+        color: #333;
+        font-size: 1.9em;
+        margin-bottom: 20px;
+        padding: 15px 20px;
+        border-bottom: 2px solid #f0f0f0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.3s ease;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .category-title:hover {
+        background-color: #f8f8f8;
+    }
+
+    .toggle-icon {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .menu-items {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 40px;
+    }
+
+    .menu-item {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.3s ease;
+        will-change: opacity, transform;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .menu-item.active {
+        /* Diese Klasse dient jetzt nur noch als Marker für den JavaScript-Code */
+    }
+
+    .menu-item:hover {
+        transform: translateY(-5px) !important; /* Das !important stellt sicher, dass der Hover-Effekt Vorrang hat */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .menu-item-image {
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .menu-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .menu-item:hover .menu-item-image img {
+        transform: scale(1.05);
+    }
+
+    .menu-item-content {
+        padding: 25px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .item-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4em;
+        color: #333;
+        margin: 0;
+        flex: 1;
+        min-width: 200px;
+        padding-right: 15px;
+    }
+
+    .item-price {
+        font-weight: bold;
+        color: #c17817;
+        font-size: 1.2em;
+        white-space: nowrap;
+    }
+
+    .description {
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.7;
+        flex-grow: 1;
+    }
+
+    .item-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: auto;
+    }
+
+    .badge {
+        font-size: 0.8em;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: #f5f5f5;
+        color: #555;
+    }
+
+    .vegetarian {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .vegan {
+        background: #e0f2f1;
+        color: #00695c;
+    }
+
+    .spicy {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    .gluten-free, .lactose-free, .alcohol-free {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .contains-alcohol {
+        background: #fce4ec;
+        color: #c2185b;
+    }
+
+    .kid-friendly {
+        background: #fff8e1;
+        color: #ff8f00;
+    }
+
+    .food-categories, .drink-categories {
+        margin-bottom: 50px;
+    }
+
+    .no-items {
+        grid-column: 1 / -1;
+        text-align: center;
+        color: #888;
+        font-style: italic;
+        padding: 20px;
+    }
+
+    /* Verbesserte Übergangseffekte für Kategorie-Toggling */
+    .menu-items {
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: none;
+        padding-top: 10px;
+    }
+
+    .menu-items:not(.hidden) {
+        opacity: 1;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .menu-items {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
+        .search-container {
+            flex-direction: column;
+        }
+        
+        #menu-search,
+        #search-button {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .item-name {
+            min-width: 0;
+            margin-bottom: 5px;
+        }
+        
+        .category-title {
+            font-size: 1.5em;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .menu-items {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 40px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOMContentLoaded event fired");
+        console.log("Categories found:", document.querySelectorAll('.category-title').length);
+        console.log("Menu items found:", document.querySelectorAll('.menu-item').length);
+        console.log("Drink categories found:", document.querySelectorAll('.drink-category').length);
+        
+        // Initialize menu state - make sure all menu-items are hidden on page load
+        const allMenuItems = document.querySelectorAll('.menu-items');
+        allMenuItems.forEach(menuItemContainer => {
+            menuItemContainer.classList.add('hidden');
+        });
+        console.log("Menu items hidden:", document.querySelectorAll('.menu-items.hidden').length);
+        
+        // Aktiviere Animation sofort für alle Menüelemente (auch wenn sie versteckt sind)
+        // Dies bereitet sie vor, damit die Animation sofort startet, wenn sie sichtbar werden
+        document.querySelectorAll('.menu-item').forEach(item => {
+            // Den active-Status setzen wir noch nicht, nur die Grundeigenschaften
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+        });
+        
+        // Accordion für Kategorien
+        const categoryTitles = document.querySelectorAll('.category-title');
+        
+        categoryTitles.forEach(title => {
+            title.addEventListener('click', function() {
+                const icon = this.querySelector('.toggle-icon');
+                const menuItems = this.nextElementSibling;
+                
+                // Performance-Optimierung: Überprüfe, ob bereits geöffnet
+                const isExpanded = !menuItems.classList.contains('hidden');
+                
+                if (isExpanded) {
+                    menuItems.classList.add('hidden');
+                    icon.textContent = '+';
+                    
+                    // Zurücksetzen der Animation für alle Elemente in dieser Kategorie
+                    menuItems.querySelectorAll('.menu-item').forEach(item => {
+                        item.classList.remove('active');
+                        // Wir setzen den Anfangszustand sofort zurück
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateY(20px)';
+                    });
+                } else {
+                    // Verzögere das Rendern der Artikel bis die Animation beginnt
+                    menuItems.classList.remove('hidden');
+                    icon.textContent = '-';
+                    
+                    // Aktiviere die Animation für jedes Element sofort nach dem Öffnen
+                    const items = menuItems.querySelectorAll('.menu-item');
+                    items.forEach((item, index) => {
+                        // Wichtig: Wir simulieren die Animation nur mit einer minimalen Verzögerung,
+                        // damit der Browser einen Frame-Unterschied hat
+                        setTimeout(() => {
+                            item.classList.add('active');
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateY(0)';
+                        }, 10 + (index * 30)); // Minimale Verzögerung für bessere Performance
+                    });
+                }
+            });
+        });
+        
+        // Suchfunktion
+        const searchInput = document.getElementById('menu-search');
+        const searchButton = document.getElementById('search-button');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const menuSections = document.querySelectorAll('.menu-section');
+        
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                // Wenn die Suche leer ist, alle Kategorien zurücksetzen
+                menuSections.forEach(section => {
+                    section.querySelector('.menu-items').classList.add('hidden');
+                    section.querySelector('.toggle-icon').textContent = '+';
+                    section.style.display = 'block'; // Make sure sections are visible
+                    
+                    // Reset animation state
+                    const items = section.querySelectorAll('.menu-item');
+                    items.forEach(item => {
+                        item.classList.remove('active');
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateY(20px)';
+                        item.style.display = 'block';
+                    });
+                });
+                
+                document.getElementById('no-results-message').style.display = 'none';
+                return;
+            }
+            
+            // Zähler für gefundene Ergebnisse
+            let foundResults = false;
+            
+            // Suche in allen Menu-Items
+            menuSections.forEach(section => {
+                const menuItemsContainer = section.querySelector('.menu-items');
+                const items = section.querySelectorAll('.menu-item');
+                let hasVisibleItems = false;
+                
+                items.forEach(item => {
+                    const itemName = item.getAttribute('data-name');
+                    const itemDescription = item.getAttribute('data-description');
+                    
+                    // Prüfen, ob der Suchbegriff im Namen oder in der Beschreibung vorkommt
+                    if (itemName && itemDescription && 
+                        (itemName.includes(searchTerm) || itemDescription.includes(searchTerm))) {
+                        item.style.display = 'block';
+                        hasVisibleItems = true;
+                        foundResults = true;
+                        
+                        // Aktiviere Animation für gefundene Elemente
+                        requestAnimationFrame(() => {
+                            item.classList.add('active');
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateY(0)';
+                        });
+                    } else {
+                        item.style.display = 'none';
+                        item.classList.remove('active');
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateY(20px)';
+                    }
+                });
+                
+                // Kategorie anzeigen oder verstecken basierend auf den sichtbaren Elementen
+                if (hasVisibleItems) {
+                    section.style.display = 'block';
+                    menuItemsContainer.classList.remove('hidden'); // Wichtig: Container sichtbar machen
+                    menuItemsContainer.style.display = 'block'; // Explizit display setzen für bessere Kompatibilität
+                    section.querySelector('.toggle-icon').textContent = '-';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            
+            // Nachricht anzeigen, wenn keine Ergebnisse gefunden wurden
+            const noResultsMessage = document.getElementById('no-results-message');
+            if (noResultsMessage) {
+                if (!foundResults) {
+                    noResultsMessage.style.display = 'block';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                }
+            }
+        }
+        
+        searchInput.addEventListener('input', performSearch);
+        searchButton.addEventListener('click', performSearch);
+        
+        // Bei Drücken der Enter-Taste auch suchen
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    });
+</script>
+{% endblock %} 
